@@ -3,10 +3,14 @@ import re
 from telegram import Update
 from telegram.ext import Application, MessageHandler, ContextTypes, filters
 
-TOKEN = os.environ["8626126146:AAHlEdJjbDb2-ulSeg-9ArubEbhZqFzTYfk"]
+TOKEN = os.getenv("BOT_TOKEN")
 
 async def anti_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not update.message or not update.message.text:
+    if not update.message:
+        return
+
+    text = update.message.text
+    if not text:
         return
 
     admins = await context.bot.get_chat_administrators(
@@ -15,12 +19,10 @@ async def anti_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     admin_ids = [a.user.id for a in admins]
 
-    # Admin aur owner ke links delete nahi honge
     if update.effective_user.id in admin_ids:
         return
 
-    # Members ke links delete honge
-    if re.search(r"(https?://|www\.|t\.me/)", update.message.text.lower()):
+    if re.search(r"(https?://|www\.|t\.me/)", text.lower()):
         try:
             await update.message.delete()
         except Exception as e:
